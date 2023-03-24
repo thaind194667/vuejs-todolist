@@ -2,7 +2,8 @@
     export default {
         name: 'RadioChoice',
         props: {
-            value: {type: String}
+            value: {type: String},
+            check: {type: Boolean}
         },
 
         data() {
@@ -21,7 +22,7 @@
 
 <template>
     <label @click="process">
-        <input type="radio" name="category" :value="value"/>
+        <input type="radio" name="category" :value="value" :checked="check"/>
         <span :class="'bubble ' + value"></span>
         <div>{{ value? value.toUpperCase() : '' }}</div>
     </label>
