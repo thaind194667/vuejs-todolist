@@ -1,55 +1,68 @@
 <script lang="ts">
-    import RadioChoice from '../radioChoice/index.vue';
+import RadioChoice from '../radioChoice/index.vue';
 
-    export default {
-        name: 'AddnewForm',
+export default {
+	name: 'AddnewForm',
 
-        components: {
-            RadioChoice
-        },
+	components: {
+		RadioChoice,
+	},
 
-        data() {
-            return {
-                inputContent: '',
-                inputCategory: null,
-            }
-        },
-        
-        methods: {
-            getChoice(value: String) {
-                this.inputCategory = value;
-                console.log(value);
-            },
+	data() {
+		return {
+			title: '',
+			content: '',
+			category: null,
+		};
+	},
 
-            sent() {
-                if(this.inputContent.trim() === '' || this.inputCategory === null) {
-                    return;
-                }
-                this.$emit('addNew', this.inputContent, this.inputCategory);
-                this.inputContent = ''
-                this.inputCategory = null
-            }
-        }
+	methods: {
+		getChoice(value: String) {
+			this.category = value;
+			console.log(value);
+		},
 
-    }
+		sent() {
+			if (this.category === null|| this.title === '' || this.content === '') return;
+			this.$emit('addNew', this.title, this.content, this.category);
+			this.content = '';
+			this.category = null;
+			this.title = '';
+		},
+	},
+};
 </script>
 
 <template>
-    <form @submit.prevent="sent">
-        <h4>Making new one</h4>
-        <input type="text" placeholder="make something" v-model="inputContent" />
+	<form @submit.prevent class="edit-form">
+		<h3 style="text-align: center; font-size: 2rem"><b>Making new note</b></h3>
+		<input type="text" placeholder="Title?" v-model="title" />
+		<input type="text" placeholder="Doing something?" v-model="content" />
 
-        <h4>Category?</h4>
-        <div class="options">
-
-            <RadioChoice @newVal="getChoice" value="business"></RadioChoice>
-            <RadioChoice @newVal="getChoice" value="personal"></RadioChoice>
-            <RadioChoice @newVal="getChoice" value="study"></RadioChoice>
-
-            <input type="submit" value="Add todo" />
-
-            <p>{{ inputCategory? inputCategory : '' }}</p>
-
-        </div>
-    </form>
+		<h3 style="font-size: 1.3rem"><b>Category?</b></h3>
+		<div class="options">
+			<RadioChoice @newVal="getChoice" value="business" v-model="category" :check="category === 'business'"></RadioChoice>
+			<RadioChoice @newVal="getChoice" value="personal" v-model="category" :check="category === 'personal'"></RadioChoice>
+			<!-- <RadioChoice @newVal="getChoice" value="study"></RadioChoice> -->
+			<!-- <p>{{ category || '' }}</p> -->
+			<div style="position: relative; display: inline-block; left: 50%">
+				<input name = "add" type="submit" value = "Add todo" @click="sent"/>
+				<input name = "add" type="submit" value = "Cancle" @click="$emit('cancle')"/>
+			</div>
+            
+		</div>
+	</form>
 </template>
+
+<style scoped>
+.options {
+	text-align: center;
+	align-items: center;
+	justify-content: center;
+}
+
+input[type="submit"] {
+    display: inline-block;
+    margin-bottom: 5px;
+}
+</style>

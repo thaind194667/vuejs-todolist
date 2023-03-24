@@ -84,14 +84,14 @@ h4 {
 	margin-bottom: 1.5rem;
 }
 
-.create-todo .options {
+.options {
 	display: grid;
 	grid-template-columns: repeat(2, 1fr);
 	grid-gap: 1rem;
 	margin-bottom: 1.5rem;
 }
 
-.create-todo .options label {
+.options label {
 	display: flex;
 	flex-direction: column;
 	align-items: center;
@@ -147,14 +147,14 @@ input:checked ~ .bubble::after {
 	opacity: 1;
 }
 
-.create-todo .options label div {
+.options label div {
 	color: var(--dark);
 	font-size: 1.125rem;
 	margin-top: 1rem;
 }
 
 .create-todo input[type="submit"] {
-	display: block;
+	display: inline-block;
 	width: 100%;
 	font-size: 1.125rem;
 	padding: 1rem 1.5rem;

@@ -1,85 +1,161 @@
-
-
 <script setup>
+import { ref, onMounted, computed, watch, onBeforeMount } from 'vue';
+import axios from 'axios';
 
-import {ref, onMounted, computed, watch, onBeforeMount} from 'vue'
-
-import AddnewForm from './components/addnewForm/index.vue'
-import ShowList from './components/showList/index.vue'
+import AddnewForm from './components/addnewForm/index.vue';
+import ShowList from './components/showList/index.vue';
+import NotiBox from './components/notificationBox/index.vue';
+import EditForm from './components/editForm/index.vue';
 
 const todos = ref([]);
-const name = ref('')
+const name = ref('');
 
-const todoAsc = computed(() => todos.value.sort((a,b) => {
-  return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-}))
+const notification = ref('');
+const notiType = ref('wating');
 
-const addTodo = (inputContent, inputCategory) => {
+const add = ref(false);
+const edit = ref('');
 
-  console.log("addTodo");
+const todoAsc = computed( () =>
+	todos.value.sort((a, b) => {
+		return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+	}),
+);
 
-  todos.value.push({
-    content: inputContent,
-    category: inputCategory,
-    done: false,
-    createdAt: new Date(),
-    finishedAt: ''
-  })
+const waitForRespone = () =>  notification.value = 'Processing ....'
+
+const hasError = () => {
+	notification.value = 'Error has occurred! ';
+	notiType.value = 'error'
 }
 
-const removeTodo = (todo) => {
-  todos.value = todos.value.filter(t => t !== todo)
+const getData = () => {
+	axios.get('https://641d13f31a68dc9e461685d0.mockapi.io/api/todos/note')
+		.then((respone) => {
+			if (respone.status === 200) {
+				todos.value = respone.data
+				console.log(respone.data);
+			}
+		})
+		.catch((error) => console.error(error));
+}
+
+const postData = (title, content, category) => {
+	waitForRespone()
+	axios.post('https://641d13f31a68dc9e461685d0.mockapi.io/api/todos/note', {
+			title: title,
+			content: content,
+			category: category,
+			done: false,
+			createdAt: new Date(),
+			finishedAt: '',
+		})
+		.then((respone) => {
+			if (respone.status === 201) {
+				notiType.value = 'add';
+				notification.value = 'Add new successfully';
+				add.value = false;
+				getData();
+			}
+		})
+		.catch((error) => console.error(error));
+}
+
+const putData = (todo) => {
+	waitForRespone()
+	axios.put(`https://641d13f31a68dc9e461685d0.mockapi.io/api/todos/note/${todo.id}`, todo)
+		.then((respone) => {
+			if (respone.status === 200) {
+				edit.value = '';
+				notiType.value = 'edit';
+				notification.value = 'Change saved';
+			}
+		})
+		.catch((error) => console.error(error));
+}
+
+const deleteData = (todo) => {
+	waitForRespone()
+	axios.delete(`https://641d13f31a68dc9e461685d0.mockapi.io/api/todos/note/${todo.id}`)
+		.then((respone) => {
+			if (respone.status === 200) {
+				// alert('Delete successfully!');
+				notiType.value = 'delete';
+				notification.value = 'Delete successfully';
+				getData();
+			}
+		})
+		.catch((error) => console.error(error));
 }
 
 const checkDone = (todo) => {
-  if(!todo.done) {
-    // console.log("not done");
-    todo.finishedAt = ''
-  }
-  else todo.finishedAt = new Date() 
+	todo.finishedAt = todo.done ? new Date() : ''
+	putData(todo);
+}
+
+const closeNoti = () => {
+	notification.value = '';
+	notiType.value = 'wating';
+}
+
+const setEdit = (todo) => {
+	edit.value = todo;
 }
 
 watch(name, (newVal) => {
-  localStorage.setItem('name', newVal);
-})
+	localStorage.setItem('name', newVal);
+});
 
-watch(todos, newVal => {
-  localStorage.setItem('todos', JSON.stringify(newVal));
+watch(todos,  (newVal) => localStorage.setItem('todos', JSON.stringify(newVal)) , 
+	{ deep: true }
+);
 
-}, {deep: true})
+onBeforeMount(() => {
+	/// created
+	console.log('creating..');
+	getData();
+});
 
-onBeforeMount(() => { /// created
-  console.log("creating..");
-}) 
-
-onMounted(() => {     /// mounted
-  console.log("mouted");
-  name.value = localStorage.getItem('name') || ''
-  todos.value = JSON.parse(localStorage.getItem('todos')) || []
-})
+onMounted(() => {
+	/// mounted
+	console.log('mouted');
+	name.value = localStorage.getItem('name') || ''
+});
 
 </script>
 
 <template>
-  <main class="app">
-    <section class="greeting">
-      <h1 class="title">
-        Hey, <input type="text" placeholder="Name" v-model="name" />
-      </h1>
-    </section>
+	<main class="app">
+		<section class="greeting">
+			<h1 class="title">Hey, <input type="text" placeholder="(input your name here)" v-model="name" /></h1>
+		</section>
 
-    <section class="create-todo">
-      <h2>Create todo</h2>
+		<section class="create-todo">
+			<input v-if="!add" type="submit" value="Add todo" @click="add = true"/>
+			<fieldset v-if="add" >
+				<legend><h2 style="margin-bottom: 10px">Create todo</h2></legend>
+				<AddnewForm @addNew="postData" @cancle="add = false"> </AddnewForm>
+			</fieldset>
+		</section>
 
-      <AddnewForm @addNew="addTodo"> </AddnewForm>
-      
-    </section>
+		<section class="todo-list">
+			<fieldset v-if="todos.length !== 0">
+				<legend>
+					<h2>TODO list</h2>
+				</legend>
+				<ShowList :todos="todoAsc" @deleteTodo="deleteData" @doneOne="checkDone" @edit="setEdit"></ShowList>
+			</fieldset>
 
-    <section class="todo-list">
-      <h2>TODO list</h2>
-      <ShowList :todos="todoAsc" @deleteTodo="removeTodo" @doneOne="checkDone"></ShowList>
-    </section>
+			<div v-else style="text-align: center; font-size: 2rem;"> Nothing here, yet! <br /> </div>
 
-  </main>
+			<fieldset v-if="edit" >
+				<!-- <legend><h2 style="margin-bottom: 10px">Create todo</h2></legend> -->
+				<EditForm @edit="putData" @cancel="edit = ''" :todo="edit"> </EditForm>
+			</fieldset>
+		</section>
+
+		<NotiBox :notiType="notiType" :notification="notification" @closeNoti="closeNoti"></NotiBox>
+
+	</main>
 </template>
 

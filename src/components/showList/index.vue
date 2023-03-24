@@ -8,6 +8,7 @@
 <template>
       <div class="list">
         <div v-for="todo in todos" :class="`todo-item ${todo.done  && 'done'}`"> 
+
             <label>
                 <input type="checkbox" 
                     @click="
@@ -18,14 +19,14 @@
             </label>
 
             <div class="todo-content">
-                <input type="text" v-model="todo.content" /> 
-                | {{ todo.category }} 
-                | {{ new Date(todo.createdAt).toUTCString() }} 
-                | Finished: {{ !todo.finishedAt ? '' : new Date(todo.finishedAt).toUTCString() }}
+                <input type="text" v-model="todo.title" />
+                -- {{ todo.category ? todo.category : 'unknow' }} -- {{ todo.id }}
+                -- {{ todo.createdAt ? new Date(todo.createdAt).toLocaleString() : '' }} <br/>
+                 {{ !todo.finishedAt ? '' : 'Finished at : ' +  new Date(todo.finishedAt).toLocaleString() }}
             </div>
 
             <div class="actions">
-                <button class="edit">Detail</button>
+                <button class="edit" @click=" $emit('edit', todo)">Detail</button>
                 <button class="delete" @click="$emit('deleteTodo', todo)">Delete</button>
             </div>
         
