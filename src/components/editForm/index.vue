@@ -13,7 +13,7 @@ export default {
 
 	methods: {
 		getChoice(value: String) {
-			this.category = value;
+			this.todo.category = value;
 			console.log(value);
 		},
 
