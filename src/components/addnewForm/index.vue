@@ -33,6 +33,31 @@ export default {
 };
 </script>
 
+<!-- <script setup>
+import {ref} from 'vue'
+import RadioChoice from '../radioChoice/index.vue';
+
+const category = ref(null);
+const title = ref('');
+const content = ref('');
+
+const emit = defineEmits(['addNew'])
+
+const getChoice = (value) => {
+	category.value = value;
+	console.log(value);
+}
+
+const sent = () => {
+	if (category.value === null|| title.value === '' || content.value === '') return;
+	emit('addNew', title.value, content.value, category.value);
+	content.value = '';
+	category.value = null;
+	title.value = '';
+}
+
+</script> -->
+
 <template>
 	<form @submit.prevent class="edit-form">
 		<h3 style="text-align: center; font-size: 2rem"><b>Making new note</b></h3>
