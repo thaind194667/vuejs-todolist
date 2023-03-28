@@ -11,7 +11,7 @@ export default {
 <template>
 	<div class="notification" :id="notiType" v-if="notification" @click="this.$emit('closeNoti')">
 		{{ notification }} <br/> <br/>
-        <small style="font-size: 1rem; margin-top: 20px;">Click anywhere to close</small>
+        <small style="font-size: 0.85rem; margin-top: 20px;">Click anywhere to close</small>
 	</div>
 </template>
 
