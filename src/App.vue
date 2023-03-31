@@ -2,16 +2,19 @@
 import { ref, onMounted, computed, watch, onBeforeMount } from 'vue';
 import axios from 'axios';
 
+import './main.css'
+
+
 import AddnewForm from './components/addnewForm/index.vue';
 import ShowList from './components/showList/index.vue';
 import NotiBox from './components/notificationBox/index.vue';
 import EditForm from './components/editForm/index.vue';
 
-const todos = ref([]);
+const todos = ref([Object]);
 const name = ref('');
 
 const notification = ref('');
-const notiType = ref('wating');
+const notiType = ref('waiting');
 
 const add = ref(false);
 const edit = ref('');
@@ -44,20 +47,23 @@ const getData = () => {
 
 const postData = (title, content, category) => {
 	waitForRespone()
-	axios.post('https://641d13f31a68dc9e461685d0.mockapi.io/api/todos/note', {
-			title: title,
-			content: content,
-			category: category,
-			done: false,
-			createdAt: new Date(),
-			finishedAt: '',
-		})
+	const newVal = {
+		title,
+		content,
+		category,
+		done: false,
+		createdAt: new Date(),
+		finishedAt: '',
+	}
+	axios.post('https://641d13f31a68dc9e461685d0.mockapi.io/api/todos/note', newVal)
 		.then((respone) => {
 			if (respone.status === 201) {
 				notiType.value = 'add';
 				notification.value = 'Add new successfully';
 				add.value = false;
-				getData();
+				console.log(respone);
+				todos.value.push(respone.data);
+				// getData();
 			}
 		})
 		.catch((error) => console.error(error));
@@ -65,12 +71,17 @@ const postData = (title, content, category) => {
 
 const putData = (todo) => {
 	waitForRespone()
+	console.log("Modify data: " + JSON.stringify(todo));
 	axios.put(`https://641d13f31a68dc9e461685d0.mockapi.io/api/todos/note/${todo.id}`, todo)
 		.then((respone) => {
 			if (respone.status === 200) {
 				edit.value = '';
 				notiType.value = 'edit';
 				notification.value = 'Change saved';
+				var index = todos.value.findIndex(obj => obj.id === todo.id);
+				todos.value[index] = todo;
+				console.log(todos.value[index]);
+				// getData()
 			}
 		})
 		.catch((error) => console.error(error));
@@ -78,30 +89,38 @@ const putData = (todo) => {
 
 const deleteData = (todo) => {
 	waitForRespone()
+	// console.log(todo);
 	axios.delete(`https://641d13f31a68dc9e461685d0.mockapi.io/api/todos/note/${todo.id}`)
 		.then((respone) => {
 			if (respone.status === 200) {
 				// alert('Delete successfully!');
 				notiType.value = 'delete';
 				notification.value = 'Delete successfully';
-				getData();
+				todos.value.splice(todos.value.findIndex(obj => obj.id === todo.id), 1);
+				// getData();
 			}
 		})
 		.catch((error) => console.error(error));
 }
 
 const checkDone = (todo) => {
+	todo.done = !todo.done
 	todo.finishedAt = todo.done ? new Date() : ''
 	putData(todo);
 }
 
 const closeNoti = () => {
 	notification.value = '';
-	notiType.value = 'wating';
+	notiType.value = 'waiting';
 }
 
 const setEdit = (todo) => {
 	edit.value = todo;
+}
+
+const setAdd = (value) => {
+	console.log(value);
+	add.value = value;
 }
 
 watch(name, (newVal) => {
@@ -133,10 +152,10 @@ onMounted(() => {
 		</section>
 
 		<section class="create-todo">
-			<input v-if="!add" type="submit" value="Add todo" @click="add = true"/>
-			<fieldset v-if="add" >
+			<input v-if="!add" type="submit" value="Add todo" @click="setAdd(true)"/>
+			<fieldset v-else >
 				<legend><h2 style="margin-bottom: 10px">Create todo</h2></legend>
-				<AddnewForm :categories="categories" @addNew="postData" @cancle="add = false"> </AddnewForm>
+				<AddnewForm :categories="categories" @addNew="postData" @cancelAdd="setAdd(false)"> </AddnewForm>
 			</fieldset>
 		</section>
 
@@ -145,14 +164,14 @@ onMounted(() => {
 				<legend>
 					<h2>TODO list</h2>
 				</legend>
-				<ShowList :todos="todoAsc" @deleteTodo="deleteData" @doneOne="checkDone" @edit="setEdit"></ShowList>
+				<ShowList :todos="todoAsc" @deleteTodo="deleteData" @setDone="checkDone" @edit="setEdit"></ShowList>
 			</fieldset>
 
-			<div v-else style="text-align: center; font-size: 2rem;"> Nothing here, yet! <br /> </div>
+			<!-- <div v-else style="text-align: center; font-size: 2rem;"> Nothing here, yet! <br /> </div> -->
 
 			<fieldset v-if="edit" >
 				<!-- <legend><h2 style="margin-bottom: 10px">Create todo</h2></legend> -->
-				<EditForm :categories="categories" @edit="putData" @cancel="edit = ''" :todo="edit"> </EditForm>
+				<EditForm :categories="categories" @edit="putData" @cancel="setEdit('')" :todo="edit"> </EditForm>
 			</fieldset>
 		</section>
 
@@ -160,4 +179,9 @@ onMounted(() => {
 
 	</main>
 </template>
+
+<style scoped lang="scss">
+
+
+</style>
 

@@ -1,4 +1,11 @@
-<script lang="ts">
+<template>
+	<div class="notification" :id="props.notiType" v-if="props.notification" @click="close">
+		{{ props.notification }} <br/> <br/>
+        <small v-if="props.notiType !== 'waiting'">Click anywhere to close</small>
+	</div>
+</template>
+
+<!-- <script lang="ts">
 export default {
 	name: 'NotiBox',
 	props: {
@@ -6,40 +13,55 @@ export default {
 		notification: { type: String },
 	},
 };
-</script>
+</script> -->
 
-<template>
-	<div class="notification" :id="notiType" v-if="notification" @click="this.$emit('closeNoti')">
-		{{ notification }} <br/> <br/>
-        <small style="font-size: 0.85rem; margin-top: 20px;">Click anywhere to close</small>
-	</div>
-</template>
+<script lang="ts" setup>
 
-<style scoped>
-.notification {
-	position: fixed;
-	width: 70vw;
-	height: 70vh;
-	top: 15vh;
-	left: 15vw;
-	display: flex;
-    flex-direction: column;
-	align-items: center;
-	justify-content: center;
-	font-size: 3rem;
-	border-radius: 10px;
+import { defineProps, defineEmits } from 'vue';
 
-	z-index: 1;
-	background-color: rgba(255, 255, 255, 0.7);
-	backdrop-filter: blur(10px);
-	border: solid 10px lime;
+const emit = defineEmits(['closeNoti']);
+
+const props = defineProps({
+	notiType: { type: String},
+	notification: { type: String },
+})
+
+const close = () => {
+	if(props.notiType !== 'waiting')
+		emit('closeNoti')
 }
 
-#wating {
-	border: solid 10px #54B4D3;
+</script>
+
+<style lang="scss" scoped>
+
+@use '../../base';
+
+@mixin border($color: lime, $thick: 10px) {
+	border: solid $thick $color;
+	border-radius: $thick;
+}
+
+.notification {
+	@include base.fullpage;
+	@include base.flexbox;
+	@include border;
+
+	font-size: 4rem;
+}
+
+#waiting {
+	@include border($color:#54B4D3);
 }
 
 #error {
-	border: solid 10px red;
+	@include border($color: red);
 }
+
+small {
+	font-size: 0.85rem; 
+	margin-top: 20px;
+}
+
+
 </style>
