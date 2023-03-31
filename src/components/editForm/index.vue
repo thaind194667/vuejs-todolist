@@ -1,5 +1,5 @@
 <template>
-	<Form class='edit-form' v-slot="{meta, errors}">
+	<Form @submit="false" class='edit-form' v-slot="{meta, errors}">
 
 		<Field as="textarea" name="title" rules="required" class="title" placeholder="Title?" v-model="editValue.title" />
 		<!-- <ErrorMessage name="title" /> -->
@@ -23,7 +23,7 @@
 		</div>
 
         <div class="action" >
-            <button class="edit" @click="send(editValue)" :disabled="!meta.valid">Edit</button>
+            <button class="edit" @click="send()" :disabled="!meta.valid">Edit</button>
             <button class="delete" @click="reset(); ">Cancel</button>
         </div>
 		<div class="errorNoti" v-if="Object.values(errors).length">
@@ -64,7 +64,7 @@ const editValue = ref({...props.todo})
 onBeforeMount(() => {
 	console.log("creating");
 	
-	console.log(editValue);
+	console.log(editValue.value);
 })
 
 onMounted(() => {
@@ -74,8 +74,8 @@ onMounted(() => {
 	
 })
 
-const send = (todo: Object) => {
-	emit('edit', todo)
+const send = () => {
+	emit('edit', editValue.value)
 }
 
 const reset = () => {
