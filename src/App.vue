@@ -16,6 +16,8 @@ const notiType = ref('wating');
 const add = ref(false);
 const edit = ref('');
 
+const categories = ['business', 'personal']
+
 const todoAsc = computed( () =>
 	todos.value.sort((a, b) => {
 		return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
@@ -134,7 +136,7 @@ onMounted(() => {
 			<input v-if="!add" type="submit" value="Add todo" @click="add = true"/>
 			<fieldset v-if="add" >
 				<legend><h2 style="margin-bottom: 10px">Create todo</h2></legend>
-				<AddnewForm @addNew="postData" @cancle="add = false"> </AddnewForm>
+				<AddnewForm :categories="categories" @addNew="postData" @cancle="add = false"> </AddnewForm>
 			</fieldset>
 		</section>
 
@@ -150,7 +152,7 @@ onMounted(() => {
 
 			<fieldset v-if="edit" >
 				<!-- <legend><h2 style="margin-bottom: 10px">Create todo</h2></legend> -->
-				<EditForm @edit="putData" @cancel="edit = ''" :todo="edit"> </EditForm>
+				<EditForm :categories="categories" @edit="putData" @cancel="edit = ''" :todo="edit"> </EditForm>
 			</fieldset>
 		</section>
 

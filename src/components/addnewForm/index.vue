@@ -1,11 +1,10 @@
 <script lang="ts">
-import RadioChoice from '../radioChoice/index.vue';
 
 export default {
 	name: 'AddnewForm',
 
-	components: {
-		RadioChoice,
+	props: {
+		categories: {type: Array<String>}
 	},
 
 	data() {
@@ -17,11 +16,6 @@ export default {
 	},
 
 	methods: {
-		getChoice(value: String) {
-			this.category = value;
-			console.log(value);
-		},
-
 		sent() {
 			if (this.category === null|| this.title === '' || this.content === '') return;
 			this.$emit('addNew', this.title, this.content, this.category);
@@ -29,9 +23,34 @@ export default {
 			this.category = null;
 			this.title = '';
 		},
+		
 	},
 };
 </script>
+
+<!-- <script setup>
+import {ref} from 'vue'
+
+const category = ref(null);
+const title = ref('');
+const content = ref('');
+
+const emit = defineEmits(['addNew'])
+
+const getChoice = (value) => {
+	category.value = value;
+	console.log(value);
+}
+
+const sent = () => {
+	if (category.value === null|| title.value === '' || content.value === '') return;
+	emit('addNew', title.value, content.value, category.value);
+	content.value = '';
+	category.value = null;
+	title.value = '';
+}
+
+</script> -->
 
 <template>
 	<form @submit.prevent class="edit-form">
@@ -41,9 +60,13 @@ export default {
 
 		<h3 style="font-size: 1.3rem"><b>Category?</b></h3>
 		<div class="options">
-			<RadioChoice @newVal="getChoice" value="business" v-model="category" :check="category === 'business'"></RadioChoice>
-			<RadioChoice @newVal="getChoice" value="personal" v-model="category" :check="category === 'personal'"></RadioChoice>
-			<!-- <RadioChoice @newVal="getChoice" value="study"></RadioChoice> -->
+			<div  v-for="Type of categories">
+				<label>
+					<input type="radio" name="category" :value="Type" v-model="category"/>
+					<span :class="'bubble ' + Type"></span>
+					<div>{{ Type ? Type.toUpperCase() : '' }}</div>
+				</label>
+			</div>
 			<!-- <p>{{ category || '' }}</p> -->
 			<div style="position: relative; display: inline-block; left: 50%">
 				<input name = "add" type="submit" value = "Add todo" @click="sent"/>

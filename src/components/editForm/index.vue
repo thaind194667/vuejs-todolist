@@ -1,48 +1,38 @@
 <script lang="ts">
-import RadioChoice from '../radioChoice/index.vue';
 
 export default {
 	name: 'EditForm',
     props: {
-        todo: {type: Object}
+        todo: {type: Object},
+		categories: {type: Array<String>}
     },
-
-	components: {
-		RadioChoice
-	},
-
-	methods: {
-		getChoice(value: String) {
-			this.category = value;
-			console.log(value);
-		},
-
-		sent(todo: Record<string, any> | undefined) {
-			this.$emit('edit', todo);
-		}
-	},
 
 };
 </script>
 
 <template>
-	<form @submit.prevent="sent" class = 'edit-form'>
+	<form @submit.prevent class = 'edit-form'>
 
 		<input style="text-align: center; font-size: 5rem; font-weight: bolder;" type="text" placeholder="Title?" v-model="todo!.title" required />
 		
 		<input style="text-align: center; font-size: 3rem; height: 30vh;" type="text" placeholder="Doing something?" v-model="todo!.content" required />
 		
         <div class="options">
-			<RadioChoice @newVal="getChoice" value="business" v-model="todo!.category" :check="todo!.category === 'business'"></RadioChoice>
-			<RadioChoice @newVal="getChoice" value="personal" v-model="todo!.category" :check="todo!.category === 'personal'"></RadioChoice>
+			<div v-for="Type of categories">
+				<label>
+					<input type="radio" name="category" :value="Type" v-model="todo!.category"/>
+					<span :class="'bubble ' + Type"></span>
+					<div>{{ Type ? Type.toUpperCase() : '' }}</div>
+				</label>
+			</div>
 		</div>
 
-        <div style="width: 100%; text-align: center; font-size: 1.5rem;"> 
+        <div style="width: 100%; text-align: center; font-size: 1.2rem;"> 
             Begin: {{ todo!.createdAt ? new Date(todo!.createdAt).toLocaleString() : '--/--/--' }} <br/>
             Finish: {{ todo!.finishedAt ? new Date(todo!.finishedAt).toLocaleString() : '--/--/--' }} <br/>
         </div>
         <div style="text-align: center; display: inline-block;" >
-            <button class="edit" @click="sent(todo)">Edit</button>
+            <button class="edit" @click="$emit('edit', todo)">Edit</button>
             <button class="delete" @click="$emit('cancel')">Cancel</button>
         </div>
 	</form>
