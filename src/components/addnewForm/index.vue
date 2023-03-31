@@ -1,4 +1,49 @@
-<script lang="ts">
+<template>
+	<Form class="edit-form" v-slot="{meta}">
+		<h3 class="form-header"><b>Making new note</b></h3>
+
+		Title: 
+		<Field as="textarea" name="title" class="input-field" rules="required|hasNumber" placeholder="Title?" v-model="title"/>
+		<ErrorMessage name="title" /> <br/>
+
+		Content: 
+		<Field as="textarea" name="content" class="input-field" rules="required" type="text" placeholder="Doing something?" v-model="content" />
+		<ErrorMessage name="content" />
+
+		<h3>
+			<b>Category?</b>
+		</h3>
+		<div class="options">
+			<div  v-for="(value, index) in props.categories" :key="index">
+				<label>
+					<!-- <input type="radio" name="category" :value="value" v-model="category"/> -->
+					<Field type="radio" name="category" :value="value" rules="required" v-model="category" /> 
+					<span :class="'bubble ' + value"></span>
+					<div>{{ value ? value.toUpperCase() : '' }}</div>
+				</label>
+			</div>
+			<ErrorMessage name="category" />
+		</div>
+
+		<div class="btn-field">
+			
+			<input 
+				type="submit" 
+				class="add" 
+				:id="!meta.valid ? 'disabled' : 'enabled'" 
+				:disabled="!meta.valid" 
+				value = "Add todo" 
+				@click="sent"/>
+
+			<input type="submit" class="cancel" value = "Cancle" @click="cancel"/>
+		</div>
+
+	</Form>
+</template>
+
+<!-- <script lang="ts">
+
+import {Form, Field} from 'vee-validate'
 
 export default {
 	name: 'AddnewForm',
@@ -26,66 +71,135 @@ export default {
 		
 	},
 };
-</script>
+</script> -->
 
-<!-- <script setup>
-import {ref} from 'vue'
+<script lang="ts" setup>
+
+import { ref, defineProps,} from 'vue';
+import {Form, Field, ErrorMessage, defineRule} from 'vee-validate'
+
+import { required, } from '@vee-validate/rules';
+
+defineRule("required", required)
+// defineRule("required", (value: String) => {
+// 	if(value && value.trim()) return true;
+// 	return 'This field is required!'
+// });
+defineRule("hasNumber", (value: any) => {
+  if(/\d/.test(value))  {
+		return "Title cannot have numbers!"
+	}
+  return true;
+});
+
+const props = defineProps({
+	categories: Array<String>
+})
 
 const category = ref(null);
 const title = ref('');
 const content = ref('');
 
-const emit = defineEmits(['addNew'])
-
-const getChoice = (value) => {
-	category.value = value;
-	console.log(value);
-}
+const emit = defineEmits(['addNew', 'cancelAdd'])
 
 const sent = () => {
-	if (category.value === null|| title.value === '' || content.value === '') return;
 	emit('addNew', title.value, content.value, category.value);
 	content.value = '';
 	category.value = null;
 	title.value = '';
 }
 
-</script> -->
+const cancel = () => emit('cancelAdd');
 
-<template>
-	<form @submit.prevent class="edit-form">
-		<h3 style="text-align: center; font-size: 2rem"><b>Making new note</b></h3>
-		<input type="text" placeholder="Title?" v-model="title" />
-		<input type="text" placeholder="Doing something?" v-model="content" />
+</script>
 
-		<h3 style="font-size: 1.3rem"><b>Category?</b></h3>
-		<div class="options">
-			<div  v-for="Type of categories">
-				<label>
-					<input type="radio" name="category" :value="Type" v-model="category"/>
-					<span :class="'bubble ' + Type"></span>
-					<div>{{ Type ? Type.toUpperCase() : '' }}</div>
-				</label>
-			</div>
-			<!-- <p>{{ category || '' }}</p> -->
-			<div style="position: relative; display: inline-block; left: 50%">
-				<input name = "add" type="submit" value = "Add todo" @click="sent"/>
-				<input name = "add" type="submit" value = "Cancle" @click="$emit('cancle')"/>
-			</div>
-            
-		</div>
-	</form>
-</template>
+<style scoped lang="scss">
 
-<style scoped>
+h3 {
+	font-size: 1.3rem;
+}
+
+textarea {
+
+	resize: none;
+}
+
+.form-header {
+	text-align: center; 
+	font-size: 2rem;
+}
+
+.input-field {
+	display: block;
+	width: 100%;
+	line-height: 3rem;
+	font-size: 1.5rem;
+	padding: 1rem 1.5rem;
+	color: var(--dark);
+	background-color: #FFF;
+	border-radius: 0.5rem;
+	box-shadow: var(--shadow);
+	margin-bottom: 1.5rem;
+}
 .options {
 	text-align: center;
 	align-items: center;
 	justify-content: center;
+	
+	// input[type="submit"] {
+	// 	display: inline-block;
+	// 	margin-bottom: 5px;
+	// }
 }
 
-input[type="submit"] {
-    display: inline-block;
-    margin-bottom: 5px;
+.btn-field {
+	display: flex;
+	text-align: center;
+	justify-content: center;
+	align-items: center;
+
+	input[type="submit"] {
+		font-weight: bolder;
+		font-size: 1.5rem;
+		// width: 30vw;
+		// height: 10vh;
+		margin: 1rem;
+		display: inline-block;
+		width: 100%;
+		font-size: 1.125rem;
+		padding: 1rem 1.5rem;
+		color: #FFF;
+		border-radius: 0.5rem;
+		box-shadow: var(--personal-glow);
+		// cursor: pointer;
+		transition: 0.2s ease-in-out;
+
+		
+		&:hover {
+			cursor: pointer;
+		}
+
+	}
+
+	.add {
+		background-color: rgb(1, 187, 1);
+	}
+
+	.cancel {
+		background-color: red;
+	}
+
+	#disabled {
+		background-color: gray;
+		color: rgb(91, 91, 91);
+		opacity: 1;
+		cursor: default;
+	}
+
+	#enabled {
+		background-color: rgb(1, 187, 1);
+		// color: white
+	}
 }
+
 </style>
