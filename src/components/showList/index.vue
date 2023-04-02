@@ -66,7 +66,8 @@ h4 {
 }
 
 .todo-content {
-    width: 100vh;
+    // width: 100vh;
+    width: 100%;
     word-break:break-all;
 }
 
