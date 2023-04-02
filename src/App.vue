@@ -1,6 +1,6 @@
 <script setup>
-import { ref, onMounted, computed, watch, onBeforeMount } from 'vue';
-import axios from 'axios';
+import { ref, onMounted, computed, watch, onBeforeMount } from 'vue'
+import axios from 'axios'
 
 import './main.css'
 
@@ -18,6 +18,7 @@ const notiType = ref('waiting');
 
 const add = ref(false);
 const edit = ref('');
+const deleteTodo = ref('');
 
 const categories = ['business', 'personal']
 
@@ -87,17 +88,25 @@ const putData = (todo) => {
 		.catch((error) => console.error(error));
 }
 
-const deleteData = (todo) => {
+const beforeDelete = (todo) => {
+	
+	notiType.value = 'deleteConfirm';
+	notification.value = 'Do you want to delete this note?';
+	deleteTodo.value = todo
+}
+
+const deleteData = () => {
 	waitForRespone()
 	// console.log(todo);
-	axios.delete(`https://641d13f31a68dc9e461685d0.mockapi.io/api/todos/note/${todo.id}`)
+	axios.delete(`https://641d13f31a68dc9e461685d0.mockapi.io/api/todos/note/${deleteTodo.value.id}`)
 		.then((respone) => {
 			if (respone.status === 200) {
 				// alert('Delete successfully!');
 				notiType.value = 'delete';
 				notification.value = 'Delete successfully';
-				todos.value.splice(todos.value.findIndex(obj => obj.id === todo.id), 1);
+				todos.value.splice(todos.value.findIndex(obj => obj.id === deleteTodo.value.id), 1);
 				// getData();
+				deleteTodo.value = ''
 			}
 		})
 		.catch((error) => console.error(error));
@@ -164,18 +173,17 @@ onMounted(() => {
 				<legend>
 					<h2>TODO list</h2>
 				</legend>
-				<ShowList :todos="todoAsc" @deleteTodo="deleteData" @setDone="checkDone" @edit="setEdit"></ShowList>
+				<ShowList :todos="todoAsc" @deleteTodo="beforeDelete" @setDone="checkDone" @edit="setEdit"></ShowList>
 			</fieldset>
 
 			<!-- <div v-else style="text-align: center; font-size: 2rem;"> Nothing here, yet! <br /> </div> -->
 
 			<fieldset v-if="edit" >
-				<!-- <legend><h2 style="margin-bottom: 10px">Create todo</h2></legend> -->
 				<EditForm :categories="categories" @edit="putData" @cancel="setEdit('')" :todo="edit"> </EditForm>
 			</fieldset>
 		</section>
 
-		<NotiBox :notiType="notiType" :notification="notification" @closeNoti="closeNoti"></NotiBox>
+		<NotiBox :notiType="notiType" :notification="notification" @closeNoti="closeNoti" @confirmDelete="deleteData"></NotiBox>
 
 	</main>
 </template>
